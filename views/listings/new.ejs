@@ -1,0 +1,63 @@
+<% layout('/layout/boilerplate') -%>
+<div class="row">
+<div class="col-8 offset-2">
+<h2 class="mt-4">Create a New Listing</h2>
+
+<form method="POST" action="/listings" novalidate class="needs-validation">
+
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input name="listing[title]" type="text" class="form-control" 
+        placeholder="enter title"
+        required>
+        <div class="invalid-feedback">Title should be valid</div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea name="listing[description]" class="form-control" placeholder="enter description"
+        required
+        ></textarea>
+        <div class="invalid-feedback">Description should be valid</div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Image URL</label>
+        <!-- IMPORTANT FOR YOUR IMAGE OBJECT SCHEMA -->
+        <input name="listing[image][url]" type="text" class="form-control" placeholder="enter image link">
+    </div>
+<div class="row ">
+    <div class="mb-3 col-4">
+        <label class="form-label">Price</label>
+        <input name="listing[price]" type="number" class="form-control" 
+        placeholder="enter price"
+        required
+        >
+        <div class="invalid-feedback">Price should be valid</div>
+    </div>
+ <div class="mb-3 col-4">
+        <label class="form-label">Country</label>
+        <input name="listing[country]" 
+        type="text" 
+        class="form-control" 
+        placeholder="enter country"
+        required
+        >
+<div class="invalid-feedback">Country should be valid</div>
+    </div>
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">Location</label>
+        <input name="listing[location]" type="text" class="form-control" placeholder="enter location"
+        required
+        >
+        <div class="invalid-feedback">Location should be valid</div>
+    </div>
+
+    <button class="btn btn-dark add-btn">Add</button>
+    <br><br>
+</form>
+</div>
+</div>
