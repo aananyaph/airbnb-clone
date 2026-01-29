@@ -4,7 +4,12 @@
 
 <h3 class="mt-4">Edit Your Listing</h3>
 
-<form method="POST" action="/listings/<%= listing._id %>?_method=PUT" class="mt-3 needs-validation" novalidate  >
+<form 
+method="POST"
+ action="/listings/<%= listing._id %>?_method=PUT" 
+ class="mt-3 needs-validation" 
+ novalidate
+ enctype="multipart/form-data"  >
 
     <div class="mb-3">
         <label class="form-label">Title</label>
@@ -15,7 +20,7 @@
             class="form-control"
             required
         />
-        <div class="invalid-feedback">Title should be valid</div>
+        <div class="valid-feedback">Title looks good!</div>
     </div>
 
     <div class="mb-3">
@@ -29,17 +34,63 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Image URL</label>
+        Original Listing Image <br>
+        <img src="<%= originalImageUrl %>" />
+    </div>
+
+
+    <div class="mb-3">
+        <label for="image" class="form-label">Upload Images</label>
         <!-- IMPORTANT: matches your schema image.url -->
         <input 
-            name="listing[image][url]" 
-            value="<%= listing.image.url %>" 
-            type="text"
+            name="listing[image]" 
+            type="file"
             class="form-control"
-            required
         />
-        <div class="invalid-feedback">Image URL should be valid</div>
     </div>
+       
+    <div class="mb-3">
+  <label class="form-label fw-semibold">Categories</label>
+
+  <div class="row">
+    <% 
+      const categories = [
+        "Trending",
+        "Rooms",
+        "Farms",
+        "Iconic Cities",
+        "Pools",
+        "Beach",
+        "Pet-friendly",
+        "Arctic",
+        "Sunrise",
+        "Horse Riding"
+      ]; 
+    %>
+
+    <% categories.forEach((cat, index) => { 
+      const id = "cat-" + cat.replace(/\s+/g, "-").toLowerCase();
+    %>
+      <div class="col-4 form-check mb-2">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="listing[category][]"
+          value="<%= cat %>"
+          id="<%= id %>"
+          <%= listing.category && listing.category.includes(cat) ? "checked" : "" %>
+          <%= index === 0 ? "required" : "" %>
+        >
+        <label class="form-check-label" for="<%= id %>">
+          <%= cat %>
+        </label>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="invalid-feedback d-block">
+    Select at least one categ
+
 
     <div class="mb-3">
         <label class="form-label">Price</label>

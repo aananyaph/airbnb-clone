@@ -1,33 +1,168 @@
 <% layout('/layout/boilerplate') -%>
+<%= success || "" %><!-- <h3>All Listings</h3> -->
 
-<body>
-  <h3>All Listings</h3>
+<style>
+/* Parent bar */
+.filters-bar {
+  display: flex;
+  align-items: center;        /* vertical alignment */
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1rem;
+}
 
-  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
+/* Filters (icons) */
+#filters {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
 
-    <% for (let listing of AllListings) { %>
+/* Individual filter */
+.filter {
+  text-align: center;
+  opacity: 0.6;
+  margin: 0 1rem;
+}
 
-      <a href="/listings/<%= listing._id %>"  class="listing_link">
+.filter:hover {
+  opacity: 1;
+  cursor: pointer;
+}
 
-        <div class="card col" style="width: 20rem;">
-          <img 
-            src="<%= listing.image.url %>"
-            class="card-img-top"
-            alt="listing_image"
-            style="height:20rem; object-fit:cover;"
-          />
-          <div class="card-img-overlay"></div>
+.filter span {
+  font-size: 0.8rem;
+}
 
-          <div class="card-body">
-            <p class="card-text">
-              <%= listing.title %><br>
-              ₹<%= listing.price.toLocaleString("en-IN") %> / night
-            </p>
-          </div>
-        </div>
-      </a>
+/* Make icons & text black */
+#filters a {
+  color: #000;
+  text-decoration: none;
+}
 
-    <% } %>
+/* Tax toggle box */
+.tax-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid black;
+  border-radius: 25px;
+  padding: 0.5rem 1rem;
+  height: 45px;
+  white-space: nowrap;
+}
 
+
+</style>
+<% if (category) { %>
+  <a href="/listings" class="btn btn-link mb-3">
+    ← Back to all listings
+  </a>
+<% } %>
+
+
+<div class="filters-bar">
+  <div id="filters">
+  <a href="/listings?category=Trending" class="filter">
+    <i class="fa-solid fa-fire"></i><br>
+    <span>Trending</span>
+  </a>
+
+  <a href="/listings?category=Rooms" class="filter">
+    <i class="fa-solid fa-bed"></i><br>
+    <span>Rooms</span>
+  </a>
+
+  <a href="/listings?category=Farms" class="filter">
+    <i class="fa-solid fa-tractor"></i><br>
+    <span>Farms</span>
+  </a>
+
+  <a href="/listings?category=Iconic Cities" class="filter">
+    <i class="fa-solid fa-city"></i><br>
+    <span>Iconic Cities</span>
+  </a>
+
+  <a href="/listings?category=Pools" class="filter">
+    <i class="fa-solid fa-person-swimming"></i><br>
+    <span>Pools</span>
+  </a>
+
+  <a href="/listings?category=Beach" class="filter">
+    <i class="fa-solid fa-umbrella-beach"></i><br>
+    <span>Beach</span>
+  </a>
+
+  <a href="/listings?category=Pet-friendly" class="filter">
+    <i class="fa-solid fa-paw"></i><br>
+    <span>Pet-friendly</span>
+  </a>
+
+  <a href="/listings?category=Arctic" class="filter">
+    <i class="fa-solid fa-snowflake"></i><br>
+    <span>Arctic</span>
+  </a>
+
+  <a href="/listings?category=Sunrise" class="filter">
+    <i class="fa-solid fa-sun"></i><br>
+    <span>Sunrise</span>
+  </a>
+
+  <a href="/listings?category=Horse Riding" class="filter">
+    <i class="fa-solid fa-horse"></i><br>
+    <span>Horse Riding</span>
+  </a>
+</div>
+
+
+  <div class="tax-toggle">
+    <div class="form-check-reverse form-switch">
+  <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+  <label class="form-check-label" for="switchCheckDefault">Include Taxes</label>
+    </div>
   </div>
-</body>
+</div>
+
+</div>
+
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4 mt-0">
+<% listings.forEach(function(listing) { %>
+  <a href="/listings/<%= listing._id %>" class="listing_link">
+    <div class="card col" style="width: 20rem;">
+      <img 
+        src="<%= listing.image && listing.image.url ? listing.image.url : 'https://via.placeholder.com/400x300?text=No+Image' %>"
+        class="card-img-top"
+        alt="<%= listing.title %>"
+        style="height:20rem; object-fit:cover;"
+        onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Image+Error'"
+      />
+      <div class="card-img-overlay"></div>
+      <div class="card-body">
+        <p class="card-text">
+          <%= listing.title %><br>
+          ₹<%= listing.price.toLocaleString("en-IN") %> / night
+         <i class="tax-info"> &nbsp; +18% GST</i>
+
+        </p>
+      </div>
+    </div>
+  </a>
+
+<% }) %>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const taxSwitch = document.getElementById("switchCheckDefault");
+
+  if (!taxSwitch) return;
+
+  taxSwitch.checked = false;
+  document.body.classList.remove("show-tax");
+
+  taxSwitch.addEventListener("change", () => {
+    document.body.classList.toggle("show-tax", taxSwitch.checked);
+  });
+});
+</script>

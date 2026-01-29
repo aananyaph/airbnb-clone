@@ -88,3 +88,6 @@ background-color:white;
    background-color:#fe424d;
    border:none !important;
 }
+.navbar-brand{
+margin-left: 1.5rem;
+}
