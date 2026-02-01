@@ -1,11 +1,15 @@
 const User=require("../models/user.js");
 
 module.exports.renderSignupForm=(req,res) => {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+        req.flash("success", "You are already signed in");
+        return res.redirect('/listings');
+    }
     res.render("users/signup.ejs");
 };
 
 
-module.exports.signup=async (req,res) => {
+module.exports.signup=async (req,res,next) => {
    try{
      let{username,email,password}=req.body;
     const user=new User({username,email});
@@ -24,6 +28,10 @@ module.exports.signup=async (req,res) => {
 };
 
 module.exports.renderLogin=(req,res) => {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+        req.flash("success", "You are already signed in");
+        return res.redirect('/listings');
+    }
     res.render("users/login.ejs");
 };
 

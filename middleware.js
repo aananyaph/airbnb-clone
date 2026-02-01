@@ -28,6 +28,11 @@ module.exports.isOwner = async (req, res, next) => {
         return res.redirect("/listings");
     }
 
+    if (!res.locals.currUser || !res.locals.currUser._id) {
+        req.flash("error", "You must be signed in first!");
+        return res.redirect("/login");
+    }
+
     if (!listing.owner || !listing.owner.equals(res.locals.currUser._id)) {
         req.flash("error", "You do not have permission to do that");
         return res.redirect(`/listings/${id}`);
@@ -81,6 +86,11 @@ module.exports.validateReview = (req, res, next) => {
     if (!review) {
         req.flash("error", "Review not found");
         return res.redirect(`/listings/${id}`);
+    }
+
+    if (!res.locals.currUser || !res.locals.currUser._id) {
+        req.flash("error", "You must be signed in first!");
+        return res.redirect("/login");
     }
 
     if (!review.author || !review.author.equals(res.locals.currUser._id)) {

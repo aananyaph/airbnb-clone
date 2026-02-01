@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const passportLocalMongoose = require("passport-local-mongoose").default;
+const passportLocalMongooseImport = require("passport-local-mongoose");
+// Handle both CommonJS and ESM default exports
+const passportLocalMongoose = passportLocalMongooseImport && passportLocalMongooseImport.default ? passportLocalMongooseImport.default : passportLocalMongooseImport;
+
 const UserSchema = new Schema({
     email: {
         type: String,
@@ -8,5 +11,11 @@ const UserSchema = new Schema({
         unique: true
     }
 });
-UserSchema.plugin(passportLocalMongoose);
+
+// Add username field (passport-local-mongoose expects this)
+// Use email as the username field
+UserSchema.plugin(passportLocalMongoose, {
+    usernameField: 'email'
+});
+
 module.exports = mongoose.model("User", UserSchema);

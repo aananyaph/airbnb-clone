@@ -91,3 +91,23 @@ background-color:white;
 .navbar-brand{
 margin-left: 1.5rem;
 }
+
+/* Tax visibility: hidden by default, shown when body has .show-tax */
+.tax-info{
+  display: none;
+  font-size: 0.9rem;
+  color: #6c757d; /* muted */
+}
+
+.show-tax .tax-info{
+  display: inline;
+}
+
+/* Listing cards spacing */
+.listing-card{
+  margin: 0.6rem;
+  transition: transform .12s ease;
+}
+.listing-card:hover{
+  transform: translateY(-4px);
+}

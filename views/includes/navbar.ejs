@@ -48,26 +48,28 @@
     </form>
       </div>
       <!-- Right side items - pushed to extreme right -->
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="/listings/new">Airbnb Your Home</a>
-        </li>
-        
-        <% if(!currUser) { %>
-          <li class="nav-item">
-            <a class="nav-link" href="/signup"><b>SignUp</b></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/login"><b>Login</b></a>
-          </li>
-        <% } %> 
-        
-        <% if(currUser) { %>
-          <li class="nav-item">
-            <a class="nav-link" href="/logout"><b>Logout</b></a>
-          </li>
-        <% } %>
-      </ul>
+      <!-- User auth section: show SignUp/Login when not authenticated, show user + Logout when authenticated -->
+<ul class="navbar-nav ms-auto">
+    <li class="nav-item">
+        <a class="nav-link" href="/listings/new">Airbnb Your Home</a>
+    </li>
+
+    <% if (currUser) { %>
+      <li class="nav-item">
+        <a class="nav-link" href="#"><b><%= currUser.username ? currUser.username : currUser.email %></b></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/logout"><b>Logout</b></a>
+      </li>
+    <% } else { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/signup"><b>SignUp</b></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/login"><b>Login</b></a>
+      </li>
+    <% } %>
+</ul>
     </div>
   </div>
 </nav>
