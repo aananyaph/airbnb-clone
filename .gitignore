@@ -1,0 +1,7 @@
+node_modules/
+.env
+
+# .vscode/
+# coverage/
+# npm-debug.log
+airbnb-clone-main/
