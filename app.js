@@ -110,6 +110,10 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render("error.ejs", { statusCode, message, err });
 });
 
-app.listen(port, () => {
-    console.log(`server is listening on port ${port}`);
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`server is listening on port ${port}`);
     });
+}
+
+module.exports = app;
