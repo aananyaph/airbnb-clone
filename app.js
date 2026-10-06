@@ -22,14 +22,12 @@ const bookingRouter=require("./routes/bookings.js");
 
 const dbUrl = process.env.ATLASDB_URL;
 
-const dbUrl = process.env.ATLASDB_URL;
-
 async function connectDB() {
     if (mongoose.connection.readyState >= 1) {
         return;
     }
     if (!dbUrl) {
-        throw new Error("ATLASDB_URL environment variable is missing! Please set ATLASDB_URL in your Vercel project environment variables.");
+        throw new Error("ATLASDB_URL environment variable is missing!");
     }
     await mongoose.connect(dbUrl);
     console.log("connected to db");
