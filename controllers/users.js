@@ -7,16 +7,19 @@ module.exports.renderSignupForm=(req,res) => {
 
 module.exports.signup=async (req,res) => {
    try{
-     let{username,email,password}=req.body;
-    const user=new User({username,email});
-    const registeredUser=await User.register(user,password);
-    console.log(registeredUser);
-    req.login(registeredUser, (err) => {
-        if(err) return next(err);
-          req.flash("success","welcome to wanderlust");
-          res.redirect("/listings");
-    });
-     }
+      let{username,email,password}=req.body;
+     const user=new User({username,email});
+     const registeredUser=await User.register(user,password);
+     console.log(registeredUser);
+     req.login(registeredUser, (err) => {
+         if(err){
+             req.flash("error",err.message);
+             return res.redirect("/signup");
+         }
+           req.flash("success","welcome to wanderlust");
+           res.redirect("/listings");
+     });
+      }
    catch(e){
     req.flash("error",e.message);
     res.redirect("/signup");

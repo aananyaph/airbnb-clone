@@ -18,21 +18,26 @@ const User=require("./models/user.js");
 const listingRouter=require("./routes/listing.js");
 const reviewRouter=require("./routes/reviews.js");
 const userRouter=require("./routes/user.js");
+const bookingRouter=require("./routes/bookings.js");
 
-const dbUrl=process.env.ATLASDB_URL;
-const port = process.env.PORT || 8080;
+const dbUrl = process.env.ATLASDB_URL;
 
-main()
-.then(() => {
-    console.log("connected to db");
-})
-.catch((err) => {
-    console.log(err);
-});
+const dbUrl = process.env.ATLASDB_URL;
 
-async function main() {
+async function connectDB() {
+    if (mongoose.connection.readyState >= 1) {
+        return;
+    }
+    if (!dbUrl) {
+        throw new Error("ATLASDB_URL environment variable is missing! Please set ATLASDB_URL in your Vercel project environment variables.");
+    }
     await mongoose.connect(dbUrl);
+    console.log("connected to db");
 }
+
+connectDB().catch((err) => {
+    console.error("MongoDB Connection Error:", err.message);
+});
 
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
@@ -42,11 +47,11 @@ app.engine('ejs',ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
 const store = MongoStore.create({
-    mongoUrl:dbUrl,
+    mongoUrl: dbUrl || "mongodb://127.0.0.1:27017/wanderlust",
     crypto: {
-        secret: process.env.SECRET,
+        secret: process.env.SECRET || "mysupersecretkey",
     },
-    touchAfter:24 * 3600,
+    touchAfter: 24 * 3600,
 });
 
 store.on("error", (err) => {
@@ -56,7 +61,7 @@ store.on("error", (err) => {
 
 const sessionOptions = {
     store,
-    secret: process.env.SECRET,
+    secret: process.env.SECRET || "mysupersecretkey",
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -68,14 +73,6 @@ const sessionOptions = {
 // app.get("/",(req,res) => {
 //     res.send("hi,i am root");
 // });
-
-app.get("/", (req, res) => {
-    res.redirect("/listings");
-});
-
-app.get("/health", (req, res) => {
-    res.status(200).send("ok");
-});
 
 
 
@@ -90,6 +87,15 @@ app.get("/health", (req, res) => {
  passport.serializeUser(User.serializeUser());
  passport.deserializeUser(User.deserializeUser());
 
+ app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        next(err);
+    }
+ });
+
  app.use((req,res,next) => {
     res.locals.success=req.flash("success");
     res.locals.error=req.flash("error");
@@ -100,6 +106,7 @@ app.get("/health", (req, res) => {
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
+app.use("/bookings", bookingRouter);
     
 app.use((req, res, next) => {
     next(new ExpressError("Page Not Found", 404));
@@ -111,9 +118,7 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-    app.listen(port, () => {
-        console.log(`server is listening on port ${port}`);
+    app.listen(8080, () => {
+        console.log("server is listening on port 8080");
     });
 }
-
-module.exports = app;

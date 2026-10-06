@@ -133,4 +133,182 @@
 <% } %>
 
 
+<!-- Razorpay Payment Integration -->
+<script src="https://checkout.razorpay.com/v3/checkout.js" async></script>
+
+<% if(currUser) { %>
+<div id="booking-form" class="mt-4">
+  <h4>Reserve Your Stay</h4>
+  <form action="/listings/<%= listing._id %>/bookings" method="POST" id="bookingForm">
+    <input type="hidden" name="checkIn" id="checkIn">
+    <input type="hidden" name="checkOut" id="checkOut">
+    <input type="hidden" name="guests" value="<%= guests || 1 %>">
+    <div class="mb-3">
+      <label class="form-label">Check-in Date</label>
+      <input type="date" class="form-control" id="checkInInput" name="checkIn" min="<?php echo date('Y-m-d'); ?>" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Check-out Date</label>
+      <input type="date" class="form-control" id="checkOutInput" name="checkOut" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Guests</label>
+      <input type="number" class="form-control" value="1" min="1" required>
+    </div>
+    <button type="submit" class="btn btn-warning w-100" style="border-radius: 25px;">
+      <i class="fa-solid fa-money-bill-wave"></i> Reserve (₹<%= listing.price %> / night)
+    </button>
+  </form>
+</div>
+
+<script>
+  // Initialize booking form
+  const checkInInput = document.getElementById('checkInInput');
+  const checkOutInput = document.getElementById('checkOutInput');
+  const pricePerNight = <%= listing.price />;
+  
+  // Set minimum date to today
+  const today = new Date().toISOString().split('T')[0];
+  checkInInput.min = today;
+  checkOutInput.min = today;
+  
+  // Calculate price when dates change
+  function calculateTotal() {
+    const checkIn = new Date(checkInInput.value);
+    const checkOut = new Date(checkOutInput.value);
+    if (checkOut > checkIn) {
+      const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+      const basePrice = pricePerNight * nights;
+      const gst = Math.round(basePrice * 0.18);
+      const total = basePrice + gst;
+      
+      // Show price breakdown
+      document.getElementById('nights-value').textContent = nights;
+      document.getElementById('base-price').textContent = '₹' + basePrice.toLocaleString('en-IN');
+      document.getElementById('gst-amount').textContent = '₹' + gst.toLocaleString('en-IN');
+      document.getElementById('total-amount').textContent = '₹' + total.toLocaleString('en-IN');
+      
+      return total;
+    }
+    return 0;
+  }
+  
+  // Form validation
+  const form = document.getElementById('bookingForm');
+  checkInInput.addEventListener('change', calculateTotal);
+  checkOutInput.addEventListener('change', calculateTotal);
+  
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const checkIn = new Date(checkInInput.value);
+    const checkOut = new Date(checkOutInput.value);
+    const today = new Date();
+    
+    // Block past dates
+    if (checkIn < today) {
+      alert('Cannot select past dates');
+      return;
+    }
+    
+    // Block if check-out is not after check-in
+    if (checkOut <= checkIn) {
+      alert('Check-out must be after check-in');
+      return;
+    }
+    
+    const total = calculateTotal();
+    if (total === 0) {
+      alert('Please select valid dates');
+      return;
+    }
+    
+    // Show loading state
+    const submitBtn = form.querySelector('button');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+    submitBtn.disabled = true;
+    
+    try {
+      // Submit form to create pending booking
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new FormData(form)
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.order) {
+        // Open Razorpay checkout
+        const options = {
+          key: '<%= process.env.RAZORPAY_KEY_ID %>',
+          amount: result.amount,
+          currency: 'INR',
+          name: 'WanderLust',
+          description: 'Booking for <%= listing.title %>',
+          order_id: result.order_id,
+          handler: function (response) {
+            // Payment successful - verify on server
+            verifyPayment(response.razorpay_payment_id, response.razorpay_order_id, response.razorpay_signature, result.bookingId);
+          },
+          prefill: {
+            name: '<%= currUser.username %>' || '',
+            email: '<%= currUser.email %>' || ''
+          },
+          theme: {
+            color: '#fe424d'
+          }
+        };
+        
+        const rzp = new Razorpay(options);
+        rzp.open();
+        
+        // Prevent form submission
+        e.preventDefault();
+      } else {
+        alert('Error creating booking: ' + (result.message || 'Unknown error'));
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Something went wrong. Please try again.');
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+  
+  function verifyPayment(paymentId, orderId, signature, bookingId) {
+    // Send to server for verification
+    fetch(`/bookings/${bookingId}/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        razorpay_payment_id: paymentId,
+        razorpay_order_id: orderId,
+        razorpay_signature: signature
+      })
+    })
+    .then(async res => {
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert('Payment confirmed! Redirecting to My Trips...');
+        window.location.href = '/bookings';
+      } else {
+        alert('Payment verification failed: ' + (data.message || 'Unknown error'));
+      }
+    })
+    .catch(err => {
+      console.error('Verification error:', err);
+      alert('Error verifying payment. Please try again.');
+    });
+  }
+</script>
+<% } %>
+
 </body>

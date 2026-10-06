@@ -1,0 +1,99 @@
+<% layout('/layout/boilerplate') -%>
+<body class="p-4">
+
+<h2>My Trips</h2>
+
+<% if(!bookings || bookings.length === 0) { %>
+  <div class="alert alert-info">
+    No bookings yet. Reserve a listing to start your trips!
+  </div>
+<% } else { %>
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Listing</th>
+          <th>Dates</th>
+          <th>Guests</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (let booking of bookings) { %>
+        <tr>
+          <td>
+            <img src="<%= booking.listing.image.url %>" alt="listing" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+            <%= booking.listing.title %>
+          </td>
+          <td>
+            <%= booking.checkIn ? (new Date(booking.checkIn)).toLocaleDateString('en-IN') : 'N/A' %> -
+            <%= booking.checkOut ? (new Date(booking.checkOut)).toLocaleDateString('en-IN') : 'N/A' %>
+          </td>
+          <td><%= booking.guests %></td>
+          <td>₹<%= booking.totalPrice.toLocaleString('en-IN') %></td>
+          <td>
+            <span class="badge badge-<%= booking.paymentStatus %>">
+              <%= booking.paymentStatus %>
+            </span>
+          </td>
+          <td>
+            <% if(booking.paymentStatus === 'pending' && booking.createdAt) { %>
+              <% const diffMinutes = (new Date() - new Date(booking.createdAt)) / (1000 * 60); %>
+              <% if(diffMinutes < 15) { %>
+                <button class="btn btn-sm btn-outline-primary retry-payment" data-booking="<%= booking._id %>">
+                  Retry Payment
+                </button>
+              <% } else { %>
+                <span class="text-danger">Expired (＞15 min)</span>
+              <% } %>
+            <% } else if(booking.paymentStatus === 'confirmed') { %>
+              <span class="text-success">Confirmed</span>
+            <% } else { %>
+              <span class="text-danger">Failed</span>
+            <% } %>
+          </td>
+        </tr>
+<% } %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Initialize retry payment buttons
+  document.querySelectorAll('.retry-payment').forEach(button => {
+    button.addEventListener('click', async () => {
+      const bookingId = button.getAttribute('data-booking');
+      
+      if (!confirm('Retry payment for this booking?')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/bookings/${bookingId}/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            razorpay_payment_id: '',
+            razorpay_order_id: '',
+            razorpay_signature: ''
+          })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('Payment successful! Redirecting to My Trips...');
+          window.location.href = '/bookings';
+        } else {
+          alert('Payment retry failed: ' + (data.message || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      alert('Error retrying payment. Please try again.');
+      }
+    });
+  });
+</body>
