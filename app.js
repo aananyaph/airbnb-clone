@@ -85,21 +85,24 @@ const sessionOptions = {
  passport.serializeUser(User.serializeUser());
  passport.deserializeUser(User.deserializeUser());
 
- app.use(async (req, res, next) => {
-    try {
-        await connectDB();
-        next();
-    } catch (err) {
-        next(err);
-    }
- });
+  // res.locals FIRST: if the DB is down, the error page still needs
+  // currUser/success/error defined, otherwise error.ejs itself crashes
+  // (EJS throws on undeclared variables) and the function dies with 500.
+  app.use((req,res,next) => {
+     res.locals.success=req.flash("success");
+     res.locals.error=req.flash("error");
+     res.locals.currUser=req.user;
+     next();
+  });
 
- app.use((req,res,next) => {
-    res.locals.success=req.flash("success");
-    res.locals.error=req.flash("error");
-    res.locals.currUser=req.user;
-    next();
- });
+  app.use(async (req, res, next) => {
+     try {
+         await connectDB();
+         next();
+     } catch (err) {
+         next(err);
+     }
+  });
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
