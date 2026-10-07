@@ -115,6 +115,12 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "Something went wrong" } = err;
+    // Guarantee the error page's variables exist even when the failure
+    // happened inside session/flash middleware (which would otherwise skip
+    // the res.locals setter and crash error.ejs with a ReferenceError).
+    if (res.locals.success === undefined) res.locals.success = [];
+    if (res.locals.error === undefined) res.locals.error = [];
+    if (res.locals.currUser === undefined) res.locals.currUser = null;
     res.status(statusCode).render("error.ejs", { statusCode, message, err });
 });
 
