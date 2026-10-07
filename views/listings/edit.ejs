@@ -34,18 +34,33 @@ method="POST"
     </div>
 
     <div class="mb-3">
-        Original Listing Image <br>
-        <img src="<%= originalImageUrl %>" />
+        Current Photos (tick any photo to remove it)<br>
+        <% if (photos && photos.length) { %>
+        <div class="row">
+          <% photos.forEach(function(p, i) { %>
+          <div class="col-4 mb-2 text-center">
+            <img src="<%= p.url %>" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px;" />
+            <div class="form-check mt-1">
+              <input class="form-check-input" type="checkbox" name="deletedImages" value="<%= p.url %>" id="del-<%= i %>">
+              <label class="form-check-label" for="del-<%= i %>">Remove</label>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } else { %>
+        <p class="card-text">No photos yet.</p>
+        <% } %>
     </div>
 
 
     <div class="mb-3">
-        <label for="image" class="form-label">Upload Images</label>
-        <!-- IMPORTANT: matches your schema image.url -->
-        <input 
-            name="listing[image]" 
+        <label for="image" class="form-label">Add More Photos (you can pick many)</label>
+        <input
+            name="listing[images]"
             type="file"
             class="form-control"
+            multiple
+            accept="image/*"
         />
     </div>
        
@@ -118,14 +133,33 @@ method="POST"
 
     <div class="mb-3">
         <label class="form-label">Location</label>
-        <input 
-            name="listing[location]" 
-            value="<%= listing.location %>" 
-            type="text" 
+        <input
+            name="listing[location]"
+            value="<%= listing.location %>"
+            type="text"
             class="form-control"
             required
         />
         <div class="invalid-feedback">Location should be valid</div>
+    </div>
+
+    <div class="row">
+        <div class="mb-3 col-3">
+            <label class="form-label">Max guests</label>
+            <input name="listing[maxGuests]" value="<%= listing.maxGuests || '' %>" type="number" min="1" class="form-control">
+        </div>
+        <div class="mb-3 col-3">
+            <label class="form-label">Bedrooms</label>
+            <input name="listing[bedrooms]" value="<%= listing.bedrooms || '' %>" type="number" min="0" class="form-control">
+        </div>
+        <div class="mb-3 col-3">
+            <label class="form-label">Beds</label>
+            <input name="listing[beds]" value="<%= listing.beds || '' %>" type="number" min="0" class="form-control">
+        </div>
+        <div class="mb-3 col-3">
+            <label class="form-label">Bathrooms</label>
+            <input name="listing[bathrooms]" value="<%= listing.bathrooms || '' %>" type="number" min="0" class="form-control">
+        </div>
     </div>
 
     <button class="btn btn-dark edit-btns mt-3">Save Changes</button>

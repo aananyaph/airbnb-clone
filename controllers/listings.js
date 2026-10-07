@@ -1,4 +1,5 @@
 const Listing = require("../models/listing");
+const Booking = require("../models/booking");
 
 /* ======================
    INDEX (with category filter + owner)
@@ -43,7 +44,35 @@ module.exports.showListing = async (req, res) => {
     return res.redirect("/listings");
   }
 
-  res.render("listings/show.ejs", { listing });
+  // Confirmed bookings block these dates. Pending bookings block them
+  // for 15 minutes only (older pendings free the dates again).
+  const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000);
+  const blockingBookings = await Booking.find({
+    listing: id,
+    $or: [
+      { status: "confirmed" },
+      { status: "pending", createdAt: { $gt: fifteenMinAgo } }
+    ]
+  }).select("checkIn checkOut");
+  const bookedDates = blockingBookings.map((b) => ({
+    from: b.checkIn.toISOString().split("T")[0],
+    to: b.checkOut.toISOString().split("T")[0]
+  }));
+
+  // Real rating average for the header strip (or null when no reviews yet)
+  let avgRating = null;
+  const reviewCount = listing.reviews ? listing.reviews.length : 0;
+  if (reviewCount) {
+    const sum = listing.reviews.reduce((s, r) => s + (r.rating || 0), 0);
+    avgRating = (sum / reviewCount).toFixed(2);
+  }
+
+  // Photo gallery (old listings may only have the single `image`)
+  const photos = listing.images && listing.images.length
+    ? listing.images
+    : (listing.image && listing.image.url ? [listing.image] : []);
+
+  res.render("listings/show.ejs", { listing, bookedDates, photos, avgRating, reviewCount });
 };
 
 
@@ -58,12 +87,22 @@ module.exports.createListing = async (req, res) => {
     req.body.listing.category = [req.body.listing.category];
   }
 
+  // Empty number inputs come as "" — drop them so Mongoose Number cast stays happy
+  for (const key of ["maxGuests", "bedrooms", "beds", "bathrooms"]) {
+    if (req.body.listing[key] === "" || req.body.listing[key] == null) {
+      delete req.body.listing[key];
+    }
+  }
+
   const newListing = new Listing(req.body.listing);
   newListing.owner = req.user._id;
-  newListing.image = {
-    url: req.file.path,
-    filename: req.file.filename
-  };
+
+  // Multiple photos (first photo is also kept in `image` for old code)
+  const photos = (req.files || []).map((f) => ({ url: f.path, filename: f.filename }));
+  if (photos.length) {
+    newListing.image = photos[0];
+    newListing.images = photos;
+  }
 
   await newListing.save();
   req.flash("success", "Successfully created a new listing!");
@@ -82,12 +121,17 @@ module.exports.renderEditForm = async (req, res) => {
     return res.redirect("/listings");
   }
 
-  let originalImageUrl = listing.image.url.replace(
+  // All current photos (old listings may only have the single `image`)
+  const photos = listing.images && listing.images.length
+    ? listing.images
+    : (listing.image && listing.image.url ? [listing.image] : []);
+
+  let originalImageUrl = photos.length ? photos[0].url.replace(
     "/uploads",
     "/uploads/w_250"
-  );
+  ) : "";
 
-  res.render("listings/edit.ejs", { listing, originalImageUrl });
+  res.render("listings/edit.ejs", { listing, photos, originalImageUrl });
 };
 
 /* ======================
@@ -102,17 +146,35 @@ module.exports.updateListing = async (req, res) => {
     req.body.listing.category = [req.body.listing.category];
   }
 
+  for (const key of ["maxGuests", "bedrooms", "beds", "bathrooms"]) {
+    if (req.body.listing[key] === "" || req.body.listing[key] == null) {
+      delete req.body.listing[key];
+    }
+  }
+
   let listing = await Listing.findByIdAndUpdate(
     id,
     { ...req.body.listing },
     { new: true }
   );
 
-  if (req.file) {
-    listing.image = {
-      url: req.file.path,
-      filename: req.file.filename
-    };
+  // Remove photos the owner ticked for deletion (match by url)
+  let removed = req.body.deletedImages || [];
+  if (!Array.isArray(removed)) removed = [removed];
+  let current = listing.images && listing.images.length
+    ? [...listing.images]
+    : (listing.image && listing.image.url ? [{ url: listing.image.url, filename: listing.image.filename }] : []);
+  if (removed.length) {
+    current = current.filter((p) => !removed.includes(p.url));
+  }
+
+  // Append newly uploaded photos
+  const added = (req.files || []).map((f) => ({ url: f.path, filename: f.filename }));
+  current = current.concat(added);
+
+  if (removed.length || added.length) {
+    listing.images = current;
+    listing.image = current.length ? current[0] : listing.image;
     await listing.save();
   }
 

@@ -1,0 +1,146 @@
+<% layout('/layout/boilerplate') -%>
+<body class="p-4">
+
+<div class="row">
+  <div class="col-12 mb-3">
+    <a href="/listings/<%= listing._id %>" class="btn btn-light rounded-circle">&larr;</a>
+    <h2 class="d-inline ms-2">Confirm and pay</h2>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Left: payment step -->
+  <div class="col-md-6">
+    <h5>Proceed to payment</h5>
+    <p class="card-text">You&rsquo;ll be directed to Razorpay to complete payment.</p>
+    <hr/>
+    <p class="card-text">By selecting the button, I agree to the <u>booking terms</u>.</p>
+    <% if (!paymentsReady) { %>
+      <div class="alert alert-warning">Payments are not configured yet. Please try again later.</div>
+      <button class="btn btn-secondary w-100" disabled>Continue to payment</button>
+    <% } else { %>
+      <button class="btn w-100 text-white" id="pay-btn" style="background: linear-gradient(to right, #e61e4d, #d90b63); border-radius: 12px;">Continue to payment</button>
+      <div id="pay-error" class="alert alert-danger mt-2" style="display: none;"></div>
+    <% } %>
+  </div>
+
+  <!-- Right: trip summary -->
+  <div class="col-md-6">
+    <div class="alert" style="background: #e6f4ea; border-radius: 12px;">
+      <span>&#127771;</span> Your price is below the 60-day average
+    </div>
+    <div class="card p-3" style="border-radius: 16px;">
+      <div class="d-flex gap-3 align-items-center">
+        <% if (listing.image) { %>
+        <img src="<%= listing.image.url %>" alt="listing" style="width: 110px; height: 100px; object-fit: cover; border-radius: 12px;">
+        <% } %>
+        <div>
+          <h5 class="mb-1"><%= listing.title %></h5>
+          <p class="card-text mb-0">
+            <% if (avgRating) { %>
+              &#9733; <%= avgRating %> (<%= reviewCount %>)
+            <% } else { %>
+              &#9733; New
+            <% } %>
+          </p>
+        </div>
+      </div>
+      <hr/>
+      <p class="mb-1"><strong>Free cancellation</strong></p>
+      <p class="card-text">Cancel before check-in for a full refund. <u>Full policy</u></p>
+      <hr/>
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <p class="mb-0"><strong>Dates</strong></p>
+          <p class="card-text"><%= new Date(booking.checkIn).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}) %> &ndash; <%= new Date(booking.checkOut).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}) %></p>
+        </div>
+        <a href="/listings/<%= listing._id %>#booking-card" class="btn btn-light btn-sm">Change</a>
+      </div>
+      <hr/>
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <p class="mb-0"><strong>Guests</strong></p>
+          <p class="card-text"><%= guestText %></p>
+        </div>
+        <a href="/listings/<%= listing._id %>#booking-card" class="btn btn-light btn-sm">Change</a>
+      </div>
+      <hr/>
+      <p class="mb-1"><strong>Price details</strong></p>
+      <p class="card-text mb-1"><%= booking.nights %> night<%= booking.nights > 1 ? 's' : '' %> x ₹<%= listing.price.toLocaleString("en-IN") %>.00 <span style="float: right;">₹<%= booking.basePrice.toLocaleString("en-IN") %>.00</span></p>
+      <p class="card-text mb-1">Taxes (18% GST) <span style="float: right;">₹<%= booking.gst.toLocaleString("en-IN") %>.00</span></p>
+      <hr/>
+      <p><strong>Total <u>INR</u></strong> <span style="float: right;"><strong>₹<%= booking.totalPrice.toLocaleString("en-IN") %>.00</strong></span></p>
+      <p class="card-text"><u>Price breakdown</u></p>
+    </div>
+  </div>
+</div>
+
+<% if (paymentsReady) { %>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  (function () {
+    const btn = document.getElementById('pay-btn');
+    const errBox = document.getElementById('pay-error');
+    const keyId = <%- JSON.stringify(keyId || "") %>;
+    const orderId = <%- JSON.stringify(orderId || "") %>;
+    const amountPaise = <%= Number(amountPaise) || 0 %>;
+    const bookingId = <%- JSON.stringify(booking._id.toString()) %>;
+    const guestEmail = <%- JSON.stringify(currUser && currUser.email ? currUser.email : "") %>;
+    const guestName = <%- JSON.stringify(currUser && currUser.username ? currUser.username : "") %>;
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      if (!orderId || !keyId) {
+        errBox.style.display = 'block';
+        errBox.textContent = 'Payment is not ready. Please try again later.';
+        return;
+      }
+      const rzp = new Razorpay({
+        key: keyId,
+        amount: amountPaise,
+        currency: 'INR',
+        name: 'Wanderlust',
+        description: <%- JSON.stringify('Booking for ' + listing.title) %>,
+        order_id: orderId,
+        prefill: { name: guestName, email: guestEmail },
+        theme: { color: '#e61e4d' },
+        modal: {
+          ondismiss: function () {
+            fetch('/bookings/' + bookingId + '/payment-failed', { method: 'POST' })
+              .then(() => {
+                errBox.style.display = 'block';
+                errBox.textContent = 'Payment not done. Your dates were released.';
+              });
+          }
+        },
+        handler: function (resp) {
+          fetch('/bookings/' + bookingId + '/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_payment_id: resp.razorpay_payment_id,
+              razorpay_order_id: resp.razorpay_order_id,
+              razorpay_signature: resp.razorpay_signature
+            })
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data && data.success) {
+                window.location.href = '/bookings';
+              } else {
+                errBox.style.display = 'block';
+                errBox.textContent = (data && data.message) || 'Payment verification failed.';
+              }
+            })
+            .catch(() => {
+              errBox.style.display = 'block';
+              errBox.textContent = 'Could not verify payment. Please try again.';
+            });
+        }
+      });
+      rzp.open();
+    });
+  })();
+</script>
+<% } %>
+
+</body>

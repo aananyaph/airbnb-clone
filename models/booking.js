@@ -25,6 +25,12 @@ const bookingSchema = new Schema({
     required: true,
     min: 1
   },
+  guestBreakdown: {
+    adults: { type: Number, default: 1, min: 0 },
+    children: { type: Number, default: 0, min: 0 },
+    infants: { type: Number, default: 0, min: 0 },
+    pets: { type: Number, default: 0, min: 0 }
+  },
   nights: {
     type: Number,
     required: true,

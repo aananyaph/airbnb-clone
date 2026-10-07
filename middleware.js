@@ -5,7 +5,12 @@ const Review = require("./models/review");
 
 module.exports.isLoggedIn = (req, res, next) => {
     if(!req.isAuthenticated()){
-        req.session.redirectTo = req.originalUrl;
+        // For a Reserve POST, send them back to the listing page (not the POST url)
+        if (req.method === "POST" && req.originalUrl.includes("/bookings")) {
+            req.session.redirectTo = req.get("Referer") || "/listings";
+        } else {
+            req.session.redirectTo = req.originalUrl;
+        }
         req.flash("error","You must be signed in first!");
         return res.redirect("/login");
     }

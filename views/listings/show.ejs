@@ -14,32 +14,158 @@
   font-size: 0.9rem;
 }
 
+.gallery-img {
+  width: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
 </style>
 <body class="p-4">
 
     <h2><%= listing.title %></h2>
+    <% const capParts = []; %>
+    <% if (listing.maxGuests) { capParts.push(listing.maxGuests + (listing.maxGuests === 1 ? " guest" : " guests")); } %>
+    <% if (listing.bedrooms) { capParts.push(listing.bedrooms + (listing.bedrooms === 1 ? " bedroom" : " bedrooms")); } %>
+    <% if (listing.beds) { capParts.push(listing.beds + (listing.beds === 1 ? " bed" : " beds")); } %>
+    <% if (listing.bathrooms) { capParts.push(listing.bathrooms + (listing.bathrooms === 1 ? " bathroom" : " bathrooms")); } %>
+    <p class="card-text text-muted"><%= capParts.length ? capParts.join(" · ") : (listing.location + ", " + listing.country) %></p>
 
-    <!-- IMAGE -->
-    <img 
-        src="<%= listing.image.url %>" 
+    <!-- Photo gallery (all property photos) -->
+    <% const gallery = (typeof photos !== "undefined" && photos.length) ? photos : (listing.image && listing.image.url ? [listing.image] : []); %>
+    <% if (gallery.length >= 3) { %>
+    <div class="row g-2 mb-3">
+      <div class="col-md-6">
+        <img src="<%= gallery[0].url %>" alt="listing photo 1" class="gallery-img" style="height: 400px;" />
+      </div>
+      <div class="col-md-6">
+        <div class="row g-2">
+          <div class="col-12">
+            <img src="<%= gallery[1].url %>" alt="listing photo 2" class="gallery-img" style="height: 196px;" />
+          </div>
+          <div class="col-12">
+            <img src="<%= gallery[2].url %>" alt="listing photo 3" class="gallery-img" style="height: 196px;" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <% if (gallery.length > 3) { %>
+    <div class="row g-2 mb-3">
+      <% for (let i = 3; i < gallery.length; i++) { %>
+      <div class="col-md-4">
+        <img src="<%= gallery[i].url %>" alt="listing photo <%= i + 1 %>" class="gallery-img" style="height: 200px;" />
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+    <% } else if (gallery.length === 2) { %>
+    <div class="row g-2 mb-3">
+      <div class="col-md-6">
+        <img src="<%= gallery[0].url %>" alt="listing photo 1" class="gallery-img" style="height: 300px;" />
+      </div>
+      <div class="col-md-6">
+        <img src="<%= gallery[1].url %>" alt="listing photo 2" class="gallery-img" style="height: 300px;" />
+      </div>
+    </div>
+    <% } else if (gallery.length === 1) { %>
+    <img
+        src="<%= gallery[0].url %>"
         alt="listing image"
         style="width: 100%; max-width: 450px; height: 300px; object-fit: cover; border-radius: 10px;"
+        class="mb-3"
     />
+    <% } %>
 
+    <div class="row">
+    <!-- Left: details -->
+    <div class="col-lg-7">
+
+    <!-- Rating strip -->
+    <% if (typeof reviewCount !== "undefined" && reviewCount) { %>
+    <div class="card p-3 mb-3">
+      <div class="row text-center align-items-center">
+        <div class="col-4">
+          <% if (avgRating && avgRating >= 4.5) { %><strong>Guest<br>favourite</strong><% } else { %><strong>Rated</strong><% } %>
+        </div>
+        <div class="col-4">One of the most loved homes, according to guests</div>
+        <div class="col-2"><strong><%= avgRating %></strong><br>&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <div class="col-2"><strong><%= reviewCount %></strong><br>Reviews</div>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Host -->
+    <div class="d-flex align-items-center gap-3 mb-2">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: #222; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700;">
+        <%= listing.owner && listing.owner.username ? listing.owner.username.charAt(0).toUpperCase() : "?" %>
+      </div>
+      <div>
+        <div><strong>Hosted by <%= listing.owner ? listing.owner.username : "Unknown" %></strong></div>
+        <small class="text-muted">Property owner</small>
+      </div>
+    </div>
+    <hr/>
+
+    <p class="card-text"><%= listing.description %></p>
     <ul class="mt-3">
-        <li>
-  <strong>Owner:</strong>
-  <%= listing.owner ? listing.owner.username : "Unknown" %>
-</li>
-
-        <li><strong>Description:</strong> <%= listing.description %></li>
-        <li><strong>Price:</strong> ₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %> / night
-</li>
+        <li><strong>Price:</strong> ₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %> / night</li>
         <li><strong>Location:</strong> <%= listing.location %></li>
         <li><strong>Country:</strong> <%= listing.country %></li>
     </ul>
     <br>
-    <% if(currUser && currUser._id.equals(listing.owner._id)) { %>
+
+    <hr/>
+    <!-- What this place offers -->
+    <div class="mb-3">
+      <h4>What this place offers</h4>
+      <div class="row">
+        <div class="col-6">
+          <p class="card-text"><i class="fa-solid fa-water"></i> Waterfront</p>
+          <p class="card-text"><i class="fa-solid fa-wifi"></i> Wifi</p>
+          <p class="card-text"><i class="fa-solid fa-tv"></i> TV</p>
+          <p class="card-text"><i class="fa-solid fa-table-cells"></i> Private patio or balcony</p>
+          <p class="card-text"><i class="fa-solid fa-temperature-arrow-down"></i> Fridge</p>
+        </div>
+        <div class="col-6">
+          <p class="card-text"><i class="fa-solid fa-utensils"></i> Kitchen</p>
+          <p class="card-text"><i class="fa-solid fa-car"></i> Free parking on premises</p>
+          <p class="card-text"><i class="fa-solid fa-snowflake"></i> Air conditioning</p>
+          <p class="card-text"><i class="fa-solid fa-shower"></i> Hairdryer</p>
+          <p class="card-text"><s><i class="fa-solid fa-triangle-exclamation"></i> Carbon monoxide alarm</s></p>
+        </div>
+      </div>
+      <button type="button" class="btn btn-light border" id="amenities-btn">Show all amenities</button>
+      <div id="amenities-more" style="display: none;">
+        <div class="row mt-2">
+          <div class="col-6">
+            <p class="card-text"><i class="fa-solid fa-fire"></i> Fire extinguisher</p>
+            <p class="card-text"><i class="fa-solid fa-kitchen-set"></i> Cooking basics</p>
+            <p class="card-text"><i class="fa-solid fa-shirt"></i> Washer</p>
+            <p class="card-text"><i class="fa-solid fa-paw"></i> Pets allowed on request</p>
+          </div>
+          <div class="col-6">
+            <p class="card-text"><i class="fa-solid fa-bell"></i> Smoke alarm</p>
+            <p class="card-text"><i class="fa-solid fa-mug-saucer"></i> Coffee maker</p>
+            <p class="card-text"><i class="fa-solid fa-plug"></i> EV charger nearby</p>
+            <p class="card-text"><i class="fa-solid fa-person-swimming"></i> Pool access</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        const btn = document.getElementById('amenities-btn');
+        const more = document.getElementById('amenities-more');
+        if (!btn || !more) return;
+        btn.addEventListener('click', function () {
+          const open = more.style.display !== 'none';
+          more.style.display = open ? 'none' : 'block';
+          btn.textContent = open ? 'Show all amenities' : 'Show fewer amenities';
+        });
+      })();
+    </script>
+    <br>
+    <% if(currUser && listing.owner && currUser._id.equals(listing.owner._id)) { %>
     <div class="row mt-2 md-3" style="margin-bottom: 1rem">
     <div class="col-auto">
         <a href="/listings/<%= listing._id %>/edit" class="btn btn-warning">
@@ -57,10 +183,243 @@
     <% } %>
 </div>
 
+    <!-- Right: sticky reserve box -->
+    <div class="col-lg-5">
+      <% if (typeof bookedDates !== "undefined" && bookedDates.length >= 2) { %>
+      <div class="alert mb-3" style="background: #fff; border: 1px solid #eee; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        <span>&#128142;</span> Rare find! This place is usually booked
+      </div>
+      <% } %>
+      <div style="position: sticky; top: 90px;">
+      <% if (listing.owner && currUser && currUser._id.equals(listing.owner._id)) { %>
+      <div class="mb-3">
+        <div class="alert alert-info">This is your listing. You cannot book your own stay.</div>
+      </div>
+      <% } else { %>
+      <div class="mb-3">
+        <div class="card p-4" id="booking-card" style="border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);">
+          <h4 id="booking-title">Add dates for prices</h4>
+          <p class="card-text"><strong>₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %> / night</strong> + 18% GST</p>
+          <form action="/listings/<%= listing._id %>/bookings" method="POST" class="needs-validation mt-3" novalidate>
+            <div style="border: 1px solid #b0b0b0; border-radius: 12px; overflow: hidden;">
+              <div class="row g-0">
+                <div class="col-6 p-2" style="border-right: 1px solid #b0b0b0;">
+                  <label for="checkInInput" class="form-label mb-0" style="font-size: 0.7rem; font-weight: 700;">CHECK-IN</label>
+                  <input type="date" class="form-control border-0 p-0" id="checkInInput" name="checkIn" required>
+                </div>
+                <div class="col-6 p-2">
+                  <label for="checkOutInput" class="form-label mb-0" style="font-size: 0.7rem; font-weight: 700;">CHECKOUT</label>
+                  <input type="date" class="form-control border-0 p-0" id="checkOutInput" name="checkOut" required>
+                </div>
+              </div>
+              <div class="p-2" style="border-top: 1px solid #b0b0b0;">
+                <label class="form-label mb-0" style="font-size: 0.7rem; font-weight: 700;">GUESTS</label>
+                <button type="button" class="btn w-100 text-start p-0" id="bk-guests-btn">
+                  <span id="bk-guests-label">1 guest</span>
+                  <span style="float: right;">&#x25BE;</span>
+                </button>
+                <div id="bk-guests-panel" style="display: none;" class="pt-2">
+                  <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom: 1px solid #eee;">
+                    <div><div><strong>Adults</strong></div><small class="text-muted">Age 13+</small></div>
+                    <div class="d-flex align-items-center gap-2">
+                      <button type="button" class="btn btn-light rounded-circle" data-step="adults:-1">&minus;</button>
+                      <span id="bk-adults">1</span>
+                      <button type="button" class="btn btn-light rounded-circle" data-step="adults:1">+</button>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom: 1px solid #eee;">
+                    <div><div><strong>Children</strong></div><small class="text-muted">Ages 2&ndash;12</small></div>
+                    <div class="d-flex align-items-center gap-2">
+                      <button type="button" class="btn btn-light rounded-circle" data-step="children:-1">&minus;</button>
+                      <span id="bk-children">0</span>
+                      <button type="button" class="btn btn-light rounded-circle" data-step="children:1">+</button>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom: 1px solid #eee;">
+                    <div><div><strong>Infants</strong></div><small class="text-muted">Under 2</small></div>
+                    <div class="d-flex align-items-center gap-2">
+                      <button type="button" class="btn btn-light rounded-circle" data-step="infants:-1">&minus;</button>
+                      <span id="bk-infants">0</span>
+                      <button type="button" class="btn btn-light rounded-circle" data-step="infants:1">+</button>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center py-2">
+                    <div><div><strong>Pets</strong></div><small class="text-muted">Service animals welcome</small></div>
+                    <div class="d-flex align-items-center gap-2">
+                      <button type="button" class="btn btn-light rounded-circle" data-step="pets:-1">&minus;</button>
+                      <span id="bk-pets">0</span>
+                      <button type="button" class="btn btn-light rounded-circle" data-step="pets:1">+</button>
+                    </div>
+                  </div>
+                </div>
+                <input type="hidden" name="adults" id="bk-adults-input" value="1">
+                <input type="hidden" name="children" id="bk-children-input" value="0">
+                <input type="hidden" name="infants" id="bk-infants-input" value="0">
+                <input type="hidden" name="pets" id="bk-pets-input" value="0">
+              </div>
+            </div>
+            <div id="bk-error" class="text-center mt-2" style="display: none;">
+              <p class="mb-1" style="color: #c13515;"><strong>&#9888;</strong> <span id="bk-error-msg">Something went wrong. Try your dates again</span></p>
+              <button type="button" class="btn w-100 text-white" id="bk-change-dates" style="background: linear-gradient(to right, #e61e4d, #d90b63); border-radius: 25px;">Change dates</button>
+            </div>
+            <div id="bk-price" class="mt-3">
+              <p class="card-text mb-1">₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %> x <span id="nights-value">0</span> nights = <span id="base-price">₹0</span></p>
+              <p class="card-text mb-1">GST (18%) = <span id="gst-amount">₹0</span></p>
+              <p class="card-text"><strong>Total = <span id="total-amount">₹0</span></strong></p>
+            </div>
+            <button type="submit" class="btn w-100 text-white mt-2" style="background: linear-gradient(to right, #e61e4d, #d90b63); border-radius: 25px;">Reserve</button>
+            <p class="text-center mt-2 mb-0"><small class="text-muted">You won&rsquo;t be charged yet</small></p>
+            <% if (!currUser) { %>
+            <small class="form-text text-muted">Please login to reserve. You will return here after login.</small>
+            <% } %>
+          </form>
+        </div>
+      </div>
+      <script>
+        (function () {
+          const checkInInput = document.getElementById('checkInInput');
+          const checkOutInput = document.getElementById('checkOutInput');
+          if (!checkInInput || !checkOutInput) return;
+          const pricePerNight = <%= Number(listing.price) || 0 %>;
+          const bookedRanges = <%- JSON.stringify(typeof bookedDates !== "undefined" ? bookedDates : []) %>;
+          const counts = { adults: 1, children: 0, infants: 0, pets: 0 };
+
+          // Block past dates
+          const today = new Date().toISOString().split('T')[0];
+          checkInInput.min = today;
+          checkOutInput.min = today;
+
+          function overlapsBooked(startStr, endStr) {
+            const start = new Date(startStr);
+            const end = new Date(endStr);
+            return bookedRanges.some((r) => {
+              const from = new Date(r.from);
+              const to = new Date(r.to);
+              return start < to && end > from;
+            });
+          }
+
+          function refreshGuests() {
+            document.getElementById('bk-adults').textContent = counts.adults;
+            document.getElementById('bk-children').textContent = counts.children;
+            document.getElementById('bk-infants').textContent = counts.infants;
+            document.getElementById('bk-pets').textContent = counts.pets;
+            document.getElementById('bk-adults-input').value = counts.adults;
+            document.getElementById('bk-children-input').value = counts.children;
+            document.getElementById('bk-infants-input').value = counts.infants;
+            document.getElementById('bk-pets-input').value = counts.pets;
+            const total = counts.adults + counts.children;
+            let label = total + (total === 1 ? ' guest' : ' guests');
+            const extra = [];
+            if (counts.infants) extra.push(counts.infants + (counts.infants === 1 ? ' infant' : ' infants'));
+            if (counts.pets) extra.push(counts.pets + (counts.pets === 1 ? ' pet' : ' pets'));
+            if (extra.length) label += ', ' + extra.join(', ');
+            document.getElementById('bk-guests-label').textContent = label;
+          }
+
+          document.getElementById('bk-guests-btn').addEventListener('click', function () {
+            const panel = document.getElementById('bk-guests-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+          });
+
+          // Minimize the guests panel when clicking anywhere outside it
+          document.addEventListener('click', function (ev) {
+            const panel = document.getElementById('bk-guests-panel');
+            const btn = document.getElementById('bk-guests-btn');
+            if (!panel || panel.style.display === 'none') return;
+            if (panel.contains(ev.target)) return;
+            if (btn && btn.contains(ev.target)) return;
+            panel.style.display = 'none';
+          });
+
+          document.querySelectorAll('[data-step]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              const parts = btn.getAttribute('data-step').split(':');
+              const key = parts[0];
+              const delta = parseInt(parts[1], 10);
+              const min = key === 'adults' ? 1 : 0;
+              counts[key] = Math.max(min, (counts[key] || 0) + delta);
+              refreshGuests();
+            });
+          });
+          refreshGuests();
+
+          function updateBreakdown() {
+            const start = new Date(checkInInput.value);
+            const end = new Date(checkOutInput.value);
+            let nights = 0;
+            if (checkInInput.value && checkOutInput.value && end > start) {
+              nights = Math.round((end - start) / (1000 * 60 * 60 * 24));
+            }
+            const base = pricePerNight * nights;
+            const gst = Math.round(base * 0.18);
+            const total = base + gst;
+            document.getElementById('nights-value').textContent = nights;
+            document.getElementById('base-price').textContent = '₹' + base.toLocaleString('en-IN');
+            document.getElementById('gst-amount').textContent = '₹' + gst.toLocaleString('en-IN');
+            document.getElementById('total-amount').textContent = '₹' + total.toLocaleString('en-IN');
+            const title = document.getElementById('booking-title');
+            if (nights > 0 && title) title.textContent = '₹' + total.toLocaleString('en-IN') + ' for ' + nights + (nights === 1 ? ' night' : ' nights');
+          }
+
+          function showDateError(msg) {
+            if (msg) document.getElementById('bk-error-msg').textContent = msg;
+            document.getElementById('bk-error').style.display = 'block';
+            document.getElementById('bk-price').style.display = 'none';
+          }
+          function hideDateError() {
+            document.getElementById('bk-error').style.display = 'none';
+            document.getElementById('bk-price').style.display = 'block';
+          }
+          document.getElementById('bk-change-dates').addEventListener('click', function () {
+            checkInInput.value = '';
+            checkOutInput.value = '';
+            hideDateError();
+            updateBreakdown();
+          });
+
+          checkInInput.addEventListener('change', function () { hideDateError(); updateBreakdown(); });
+          checkOutInput.addEventListener('change', function () { hideDateError(); updateBreakdown(); });
+          updateBreakdown();
+
+          const form = checkInInput.closest('form');
+          form.addEventListener('submit', function (e) {
+            const startOk = !!checkInInput.value;
+            const endOk = !!checkOutInput.value;
+            const start = new Date(checkInInput.value);
+            const end = new Date(checkOutInput.value);
+            const day = new Date();
+            day.setHours(0, 0, 0, 0);
+            const inDay = new Date(checkInInput.value);
+            inDay.setHours(0, 0, 0, 0);
+            const badDates = !startOk || !endOk || !(end > start) || inDay < day;
+            const taken = !badDates && overlapsBooked(checkInInput.value, checkOutInput.value);
+            if (badDates || taken) {
+              e.preventDefault();
+              e.stopPropagation();
+              showDateError(taken
+                ? 'Those dates are already booked for this listing.'
+                : 'Please select valid dates. Check-out must be after check-in and dates cannot be in the past.');
+              return;
+            }
+            if (counts.adults < 1) {
+              e.preventDefault();
+              e.stopPropagation();
+              alert('Please select at least 1 adult.');
+            }
+          });
+        })();
+      </script>
+      <% } %>
+      </div>
+      <p class="text-center mt-2"><small><span>&#9873;</span> <u>Report this listing</u></small></p>
+    </div>
+    </div>
+
 
 
 <div class="col-8 offset-3 mb-3">
-    
+
     <% if(currUser) { %>
 <h4>Leave a Review</h4>
  <form action="/listings/<%= listing.id %>/reviews" method="POST" novalidate class="needs-validation ">
@@ -132,183 +491,5 @@
   </div>
 <% } %>
 
-
-<!-- Razorpay Payment Integration -->
-<script src="https://checkout.razorpay.com/v3/checkout.js" async></script>
-
-<% if(currUser) { %>
-<div id="booking-form" class="mt-4">
-  <h4>Reserve Your Stay</h4>
-  <form action="/listings/<%= listing._id %>/bookings" method="POST" id="bookingForm">
-    <input type="hidden" name="checkIn" id="checkIn">
-    <input type="hidden" name="checkOut" id="checkOut">
-    <input type="hidden" name="guests" value="<%= guests || 1 %>">
-    <div class="mb-3">
-      <label class="form-label">Check-in Date</label>
-      <input type="date" class="form-control" id="checkInInput" name="checkIn" min="<?php echo date('Y-m-d'); ?>" required>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Check-out Date</label>
-      <input type="date" class="form-control" id="checkOutInput" name="checkOut" required>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Guests</label>
-      <input type="number" class="form-control" value="1" min="1" required>
-    </div>
-    <button type="submit" class="btn btn-warning w-100" style="border-radius: 25px;">
-      <i class="fa-solid fa-money-bill-wave"></i> Reserve (₹<%= listing.price %> / night)
-    </button>
-  </form>
-</div>
-
-<script>
-  // Initialize booking form
-  const checkInInput = document.getElementById('checkInInput');
-  const checkOutInput = document.getElementById('checkOutInput');
-  const pricePerNight = <%= listing.price />;
-  
-  // Set minimum date to today
-  const today = new Date().toISOString().split('T')[0];
-  checkInInput.min = today;
-  checkOutInput.min = today;
-  
-  // Calculate price when dates change
-  function calculateTotal() {
-    const checkIn = new Date(checkInInput.value);
-    const checkOut = new Date(checkOutInput.value);
-    if (checkOut > checkIn) {
-      const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-      const basePrice = pricePerNight * nights;
-      const gst = Math.round(basePrice * 0.18);
-      const total = basePrice + gst;
-      
-      // Show price breakdown
-      document.getElementById('nights-value').textContent = nights;
-      document.getElementById('base-price').textContent = '₹' + basePrice.toLocaleString('en-IN');
-      document.getElementById('gst-amount').textContent = '₹' + gst.toLocaleString('en-IN');
-      document.getElementById('total-amount').textContent = '₹' + total.toLocaleString('en-IN');
-      
-      return total;
-    }
-    return 0;
-  }
-  
-  // Form validation
-  const form = document.getElementById('bookingForm');
-  checkInInput.addEventListener('change', calculateTotal);
-  checkOutInput.addEventListener('change', calculateTotal);
-  
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const checkIn = new Date(checkInInput.value);
-    const checkOut = new Date(checkOutInput.value);
-    const today = new Date();
-    
-    // Block past dates
-    if (checkIn < today) {
-      alert('Cannot select past dates');
-      return;
-    }
-    
-    // Block if check-out is not after check-in
-    if (checkOut <= checkIn) {
-      alert('Check-out must be after check-in');
-      return;
-    }
-    
-    const total = calculateTotal();
-    if (total === 0) {
-      alert('Please select valid dates');
-      return;
-    }
-    
-    // Show loading state
-    const submitBtn = form.querySelector('button');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
-    submitBtn.disabled = true;
-    
-    try {
-      // Submit form to create pending booking
-      const response = await fetch(form.action, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new FormData(form)
-      });
-      
-      const result = await response.json();
-      
-      if (response.ok && result.order) {
-        // Open Razorpay checkout
-        const options = {
-          key: '<%= process.env.RAZORPAY_KEY_ID %>',
-          amount: result.amount,
-          currency: 'INR',
-          name: 'WanderLust',
-          description: 'Booking for <%= listing.title %>',
-          order_id: result.order_id,
-          handler: function (response) {
-            // Payment successful - verify on server
-            verifyPayment(response.razorpay_payment_id, response.razorpay_order_id, response.razorpay_signature, result.bookingId);
-          },
-          prefill: {
-            name: '<%= currUser.username %>' || '',
-            email: '<%= currUser.email %>' || ''
-          },
-          theme: {
-            color: '#fe424d'
-          }
-        };
-        
-        const rzp = new Razorpay(options);
-        rzp.open();
-        
-        // Prevent form submission
-        e.preventDefault();
-      } else {
-        alert('Error creating booking: ' + (result.message || 'Unknown error'));
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Something went wrong. Please try again.');
-      submitBtn.innerHTML = originalText;
-      submitBtn.disabled = false;
-    }
-  });
-  
-  function verifyPayment(paymentId, orderId, signature, bookingId) {
-    // Send to server for verification
-    fetch(`/bookings/${bookingId}/verify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        razorpay_payment_id: paymentId,
-        razorpay_order_id: orderId,
-        razorpay_signature: signature
-      })
-    })
-    .then(async res => {
-      const data = await res.json();
-      if (res.ok && data.success) {
-        alert('Payment confirmed! Redirecting to My Trips...');
-        window.location.href = '/bookings';
-      } else {
-        alert('Payment verification failed: ' + (data.message || 'Unknown error'));
-      }
-    })
-    .catch(err => {
-      console.error('Verification error:', err);
-      alert('Error verifying payment. Please try again.');
-    });
-  }
-</script>
-<% } %>
 
 </body>

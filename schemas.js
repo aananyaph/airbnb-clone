@@ -27,6 +27,11 @@ module.exports.listingSchema = Joi.object({
     location: Joi.string().required(),
     country: Joi.string().required(),
 
+    maxGuests: Joi.number().min(1).optional().allow("", null),
+    bedrooms: Joi.number().min(0).optional().allow("", null),
+    beds: Joi.number().min(0).optional().allow("", null),
+    bathrooms: Joi.number().min(0).optional().allow("", null),
+
     image: Joi.alternatives()
       .try(
         Joi.string().allow(""),

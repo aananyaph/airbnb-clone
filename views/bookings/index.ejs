@@ -24,76 +24,56 @@
         <% for (let booking of bookings) { %>
         <tr>
           <td>
+            <% if (booking.listing && booking.listing.image) { %>
             <img src="<%= booking.listing.image.url %>" alt="listing" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-            <%= booking.listing.title %>
+            <% } %>
+            <%= booking.listing ? booking.listing.title : "Deleted listing" %>
           </td>
           <td>
             <%= booking.checkIn ? (new Date(booking.checkIn)).toLocaleDateString('en-IN') : 'N/A' %> -
             <%= booking.checkOut ? (new Date(booking.checkOut)).toLocaleDateString('en-IN') : 'N/A' %>
           </td>
           <td><%= booking.guests %></td>
-          <td>₹<%= booking.totalPrice.toLocaleString('en-IN') %></td>
+          <td>₹<%= booking.totalPrice ? booking.totalPrice.toLocaleString('en-IN') : 'N/A' %></td>
           <td>
-            <span class="badge badge-<%= booking.paymentStatus %>">
-              <%= booking.paymentStatus %>
-            </span>
+            <% if (booking.paymentStatus === 'paid') { %>
+              <span class="badge bg-success">Paid</span>
+            <% } else if (booking.paymentStatus === 'refunded') { %>
+              <span class="badge bg-secondary">Refunded</span>
+            <% } else if (booking.paymentStatus === 'failed') { %>
+              <span class="badge bg-danger">Failed</span>
+            <% } else if (booking.status === 'cancelled') { %>
+              <span class="badge bg-secondary">Cancelled</span>
+            <% } else if (booking.status === 'pending') { %>
+              <span class="badge bg-warning text-dark">Pending</span>
+            <% } else { %>
+              <span class="badge bg-success">Confirmed</span>
+            <% } %>
           </td>
           <td>
-            <% if(booking.paymentStatus === 'pending' && booking.createdAt) { %>
-              <% const diffMinutes = (new Date() - new Date(booking.createdAt)) / (1000 * 60); %>
-              <% if(diffMinutes < 15) { %>
-                <button class="btn btn-sm btn-outline-primary retry-payment" data-booking="<%= booking._id %>">
-                  Retry Payment
-                </button>
-              <% } else { %>
-                <span class="text-danger">Expired (＞15 min)</span>
-              <% } %>
-            <% } else if(booking.paymentStatus === 'confirmed') { %>
-              <span class="text-success">Confirmed</span>
+            <% const inDay = booking.checkIn ? new Date(booking.checkIn) : null; %>
+            <% if (inDay) { inDay.setHours(0,0,0,0); } %>
+            <% const day = new Date(); day.setHours(0,0,0,0); %>
+            <% const ageMin = booking.createdAt ? (new Date() - new Date(booking.createdAt)) / (1000 * 60) : 999; %>
+            <% if (booking.status === 'pending' && ageMin < 15 && inDay && inDay > day) { %>
+              <a href="/bookings/<%= booking._id %>/checkout" class="btn btn-sm btn-warning">Retry payment</a>
+            <% } else if (booking.status === 'pending') { %>
+              <span class="text-muted">Expired</span>
+            <% } else if (booking.status === 'confirmed' && inDay && inDay > day) { %>
+              <form method="POST" action="/bookings/<%= booking._id %>/cancel?_method=PUT">
+                <button class="btn btn-sm btn-danger">Cancel</button>
+              </form>
+            <% } else if (booking.status === 'confirmed') { %>
+              <span class="text-muted">Past / ongoing</span>
             <% } else { %>
-              <span class="text-danger">Failed</span>
+              <span class="text-muted">Cancelled</span>
             <% } %>
           </td>
         </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
 <% } %>
-    </tbody>
-  </table>
-</div>
 
-<script>
-  // Initialize retry payment buttons
-  document.querySelectorAll('.retry-payment').forEach(button => {
-    button.addEventListener('click', async () => {
-      const bookingId = button.getAttribute('data-booking');
-      
-      if (!confirm('Retry payment for this booking?')) {
-        return;
-      }
-      
-      try {
-        const response = await fetch(`/bookings/${bookingId}/verify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            razorpay_payment_id: '',
-            razorpay_order_id: '',
-            razorpay_signature: ''
-          })
-        });
-        
-        const data = await response.json();
-        if (data.success) {
-          alert('Payment successful! Redirecting to My Trips...');
-          window.location.href = '/bookings';
-        } else {
-          alert('Payment retry failed: ' + (data.message || 'Unknown error'));
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      alert('Error retrying payment. Please try again.');
-      }
-    });
-  });
 </body>

@@ -39,9 +39,23 @@ const listingSchema = new Schema({
     },
   },
 
+  // All property photos (first photo is also kept in `image` for old code)
+  images: [
+    {
+      filename: { type: String },
+      url: { type: String }
+    }
+  ],
+
   price: Number,
   location: String,
   country: String,
+
+  // Capacity details shown as "4 guests · 2 bedrooms · 2 beds · 1 bathroom"
+  maxGuests: { type: Number, min: 1 },
+  bedrooms: { type: Number, min: 0 },
+  beds: { type: Number, min: 0 },
+  bathrooms: { type: Number, min: 0 },
 
   category: {
     type: [String],           // ✅ ARRAY

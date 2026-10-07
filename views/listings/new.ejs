@@ -23,9 +23,28 @@
 
 
      <div class="mb-3">
-        <label class="form-label">Upload Images</label>
-        <!-- IMPORTANT FOR YOUR IMAGE OBJECT SCHEMA -->
-        <input name="listing[image]" type="file" class="form-control" required>
+        <label class="form-label">Upload Property Photos (you can pick many)</label>
+        <input name="listing[images]" type="file" class="form-control" multiple accept="image/*" required>
+        <div class="invalid-feedback">Please upload at least one photo</div>
+    </div>
+
+    <div class="row">
+        <div class="mb-3 col-3">
+            <label class="form-label">Max guests</label>
+            <input name="listing[maxGuests]" type="number" min="1" class="form-control" placeholder="e.g. 4">
+        </div>
+        <div class="mb-3 col-3">
+            <label class="form-label">Bedrooms</label>
+            <input name="listing[bedrooms]" type="number" min="0" class="form-control" placeholder="e.g. 2">
+        </div>
+        <div class="mb-3 col-3">
+            <label class="form-label">Beds</label>
+            <input name="listing[beds]" type="number" min="0" class="form-control" placeholder="e.g. 2">
+        </div>
+        <div class="mb-3 col-3">
+            <label class="form-label">Bathrooms</label>
+            <input name="listing[bathrooms]" type="number" min="0" class="form-control" placeholder="e.g. 1">
+        </div>
     </div>
 
 
