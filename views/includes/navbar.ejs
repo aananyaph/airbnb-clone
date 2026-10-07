@@ -17,6 +17,176 @@
     padding: 0.5rem 3rem 0.5rem 3rem;
     font-size: 1rem;
   }
+
+  /* Airbnb-style search pill (Where / When / Who) */
+  .navbar-nav .nav-link{
+    white-space: nowrap;
+  }
+  .ab-search{
+    display: flex;
+    align-items: stretch;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 4px;
+    max-width: 730px;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0 12px;
+    position: relative;
+  }
+  .ab-seg{
+    padding: 6px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+  .ab-seg > label{
+    font-size: 0.68rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  .ab-seg input{
+    border: 0;
+    outline: 0;
+    background: transparent;
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 0;
+  }
+  .ab-where{ flex: 1.2; min-width: 0; }
+  .ab-when{ flex: 1.4; min-width: 0; border-left: 1px solid #eee; border-right: 1px solid #eee; }
+  .ab-when-btn{
+    background: none;
+    border: 0;
+    padding: 0;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .ab-when-btn > span:first-child{ font-size: 0.68rem; font-weight: 700; }
+  .ab-when-value{
+    font-size: 0.9rem;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ab-cal{
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 660px;
+    max-width: 92vw;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+    padding: 16px 20px;
+    z-index: 1060;
+  }
+  .ab-cal-tabs{
+    display: flex;
+    background: #eee;
+    border-radius: 999px;
+    width: max-content;
+    margin: 0 auto 12px;
+    padding: 3px;
+  }
+  .ab-tab{
+    border: 0;
+    background: transparent;
+    border-radius: 999px;
+    padding: 6px 22px;
+    font-size: 0.85rem;
+  }
+  .ab-tab-active{ background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); font-weight: 700; }
+  .ab-cal-top{ display: flex; align-items: center; justify-content: space-between; }
+  .ab-cal-top button{ background: none; border: 0; font-size: 1.2rem; padding: 4px 10px; border-radius: 50%; }
+  .ab-cal-top button:hover{ background: #f3f3f3; }
+  .ab-cal-top button:disabled{ opacity: 0.25; }
+  .ab-cal-grids{ display: flex; gap: 32px; }
+  .ab-cal-month{ flex: 1; min-width: 0; }
+  .ab-cal-month h6{ text-align: center; font-weight: 700; margin-bottom: 8px; }
+  .ab-cal-dow, .ab-cal-days{ display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+  .ab-cal-dow{ font-size: 0.72rem; color: #717171; margin-bottom: 4px; }
+  .ab-day{
+    border: 0;
+    background: none;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    font-size: 0.85rem;
+  }
+  .ab-day:not(:disabled):hover{ border: 1px solid #222; }
+  .ab-day:disabled{ color: #ccc; }
+  .ab-day-sel{ background: #222 !important; color: #fff !important; }
+  .ab-day-range{ background: #f3f3f3; border-radius: 0; }
+  .ab-cal-foot{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    margin-top: 12px;
+    padding: 10px 14px;
+  }
+  .ab-cal-foot > div{ flex: 1; }
+  .ab-cal-foot small{ color: #717171; }
+  @media (max-width: 768px){
+    .ab-cal{ left: 0; transform: none; width: 100%; }
+    .ab-cal-grids{ flex-direction: column; }
+  }
+  .ab-who{ flex: 0.7; min-width: 0; }
+  .ab-go{ align-self: center; margin-right: 2px; white-space: nowrap; }
+  .ab-panel{
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 340px;
+    max-height: 380px;
+    overflow: auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+    padding: 12px;
+    z-index: 1050;
+  }
+  .ab-panel p.ab-head{
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin: 8px 4px 4px;
+  }
+  .ab-item{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: 0;
+    border-radius: 10px;
+    padding: 8px 6px;
+  }
+  .ab-item:hover{ background: #f7f7f7; }
+  .ab-ico{
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #f3e8f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex: none;
+  }
+  .ab-item small{ color: #6b7280; }
+  @media (max-width: 768px){
+    .ab-search{ flex-wrap: wrap; border-radius: 16px; }
+    .ab-when{ border: 0; }
+  }
 </style>
 
 <nav class="navbar navbar-expand-lg bg-body-light border-bottom sticky-top">
@@ -38,14 +208,310 @@
       </ul>
       
       <div class="navbar-nav ms-auto">
-         <form class="d-flex">
-      <input class="form-control me-2 search-inp" 
-      type="search" 
-      placeholder="Search Destinations" 
-     >
-      <button class="btn btn-search" type="submit">
+    <form class="ab-search" action="/listings" method="GET" id="ab-search-form">
+      <div class="ab-seg ab-where">
+        <label for="ab-where">Where</label>
+        <input
+          type="search"
+          id="ab-where"
+          name="q"
+          placeholder="Search destinations"
+          autocomplete="off"
+          value="<%= (typeof filters !== 'undefined' && filters.q) ? filters.q : '' %>"
+        >
+        <div class="ab-panel" id="ab-panel" style="display: none;">
+          <p class="ab-head">Recent searches</p>
+          <div id="ab-recents"></div>
+          <p class="ab-head">Suggested destinations</p>
+          <button type="button" class="ab-item" data-q="Nearby">
+            <span class="ab-ico"><i class="fa-solid fa-location-arrow"></i></span>
+            <span><strong>Nearby</strong><br><small>Find what&rsquo;s around you</small></span>
+          </button>
+          <button type="button" class="ab-item" data-q="Gokarna">
+            <span class="ab-ico"><i class="fa-solid fa-umbrella-beach"></i></span>
+            <span><strong>Gokarna, Karnataka</strong><br><small>For beach lovers</small></span>
+          </button>
+          <button type="button" class="ab-item" data-q="Munnar">
+            <span class="ab-ico"><i class="fa-solid fa-mountain"></i></span>
+            <span><strong>Munnar, Kerala</strong><br><small>For nature lovers</small></span>
+          </button>
+          <button type="button" class="ab-item" data-q="Goa">
+            <span class="ab-ico"><i class="fa-solid fa-location-dot"></i></span>
+            <span><strong>Goa</strong><br><small>Weekend getaways</small></span>
+          </button>
+          <button type="button" class="ab-item" data-q="Wayanad">
+            <span class="ab-ico"><i class="fa-solid fa-tree"></i></span>
+            <span><strong>Wayanad</strong><br><small>For tea trails</small></span>
+          </button>
+        </div>
+      </div>
+      <div class="ab-seg ab-when">
+        <button type="button" class="ab-when-btn" id="ab-when-btn">
+          <span>When</span>
+          <span class="ab-when-value" id="ab-when-value">Add dates</span>
+        </button>
+        <input type="hidden" name="checkIn" id="ab-cal-in" value="<%= (typeof filters !== 'undefined' && filters.checkIn) ? filters.checkIn : '' %>">
+        <input type="hidden" name="checkOut" id="ab-cal-out" value="<%= (typeof filters !== 'undefined' && filters.checkOut) ? filters.checkOut : '' %>">
+        <div class="ab-cal" id="ab-cal" style="display: none;">
+          <div class="ab-cal-tabs">
+            <button type="button" class="ab-tab ab-tab-active" data-abtab="dates">Dates</button>
+            <button type="button" class="ab-tab" data-abtab="flex">Flexible</button>
+          </div>
+          <div id="ab-cal-dates">
+            <div class="ab-cal-top">
+              <button type="button" id="ab-cal-prev" aria-label="Previous month">&lsaquo;</button>
+              <button type="button" id="ab-cal-next" aria-label="Next month">&rsaquo;</button>
+            </div>
+            <div class="ab-cal-grids">
+              <div class="ab-cal-month">
+                <h6 id="ab-m1t"></h6>
+                <div class="ab-cal-dow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+                <div class="ab-cal-days" id="ab-m1"></div>
+              </div>
+              <div class="ab-cal-month">
+                <h6 id="ab-m2t"></h6>
+                <div class="ab-cal-dow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+                <div class="ab-cal-days" id="ab-m2"></div>
+              </div>
+            </div>
+            <div class="ab-cal-foot">
+              <div><small>Check-in</small><br><strong id="ab-foot-in">Exact date</strong></div>
+              <div><small>Checkout</small><br><strong id="ab-foot-out">Exact date</strong></div>
+              <button type="button" class="btn btn-light btn-sm border" id="ab-cal-clear">Clear dates</button>
+            </div>
+          </div>
+          <div id="ab-cal-flex" style="display: none;">
+            <p class="text-center text-muted py-3 mb-0">Flexible search isn&rsquo;t available yet &mdash; exact dates work everywhere.</p>
+          </div>
+        </div>
+      </div>
+      <div class="ab-seg ab-who">
+        <label for="ab-who">Who</label>
+        <input type="number" id="ab-who" name="guests" min="1" placeholder="Add guests" value="<%= (typeof filters !== 'undefined' && filters.guests) ? filters.guests : '' %>">
+      </div>
+      <button class="btn btn-search ab-go" type="submit">
         <i class="fa-solid fa-magnifying-glass"></i>Search</button>
     </form>
+    <script>
+      (function () {
+        const form = document.getElementById('ab-search-form');
+        if (!form) return;
+        const where = document.getElementById('ab-where');
+        const panel = document.getElementById('ab-panel');
+        const recBox = document.getElementById('ab-recents');
+
+        function getRecents() {
+          try { return JSON.parse(localStorage.getItem('abRecentSearches') || '[]'); }
+          catch (e) { return []; }
+        }
+        function fmtDay(s) {
+          if (!s) return '';
+          const d = new Date(s);
+          if (isNaN(d)) return '';
+          return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        }
+        function subFor(r) {
+          const bits = [];
+          if (r.checkIn && r.checkOut) bits.push(fmtDay(r.checkIn) + '–' + fmtDay(r.checkOut));
+          else if (r.checkIn) bits.push('From ' + fmtDay(r.checkIn));
+          if (r.guests) bits.push(r.guests + (r.guests === '1' ? ' guest' : ' guests'));
+          return bits.join(' · ') || 'Any dates';
+        }
+        function renderRecents() {
+          const list = getRecents();
+          recBox.innerHTML = '';
+          if (!list.length) {
+            recBox.innerHTML = '<p class="px-2"><small class="text-muted">No recent searches yet</small></p>';
+            return;
+          }
+          list.forEach(function (r) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'ab-item';
+            b.innerHTML = '<span class="ab-ico"><i class="fa-solid fa-clock-rotate-left"></i></span>' +
+              '<span><strong></strong><br><small></small></span>';
+            b.querySelector('strong').textContent = r.q || 'Anywhere';
+            b.querySelector('small').textContent = subFor(r);
+            b.addEventListener('click', function () {
+              where.value = r.q || '';
+              form.checkIn.value = r.checkIn || '';
+              form.checkOut.value = r.checkOut || '';
+              form.guests.value = r.guests || '';
+              form.submit();
+            });
+            recBox.appendChild(b);
+          });
+        }
+        function openPanel() {
+          renderRecents();
+          panel.style.display = 'block';
+          const cal = document.getElementById('ab-cal');
+          if (cal) cal.style.display = 'none';
+        }
+        where.addEventListener('focus', openPanel);
+        where.addEventListener('click', openPanel);
+        document.addEventListener('click', function (ev) {
+          if (panel.style.display === 'none') return;
+          if (panel.contains(ev.target) || where.contains(ev.target)) return;
+          panel.style.display = 'none';
+        });
+        panel.querySelectorAll('[data-q]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            where.value = b.getAttribute('data-q');
+            panel.style.display = 'none';
+            where.focus();
+          });
+        });
+        form.addEventListener('submit', function () {
+          try {
+            const q = where.value.trim();
+            const r = {
+              q: q,
+              checkIn: form.checkIn.value || '',
+              checkOut: form.checkOut.value || '',
+              guests: form.guests.value || ''
+            };
+            let list = getRecents().filter(function (x) {
+              return !((x.q || '') === r.q && (x.checkIn || '') === r.checkIn &&
+                (x.checkOut || '') === r.checkOut && (x.guests || '') === r.guests);
+            });
+            list.unshift(r);
+            localStorage.setItem('abRecentSearches', JSON.stringify(list.slice(0, 5)));
+          } catch (e) { /* private mode: skip recents */ }
+        });
+      })();
+    </script>
+    <script>
+      (function () {
+        const btn = document.getElementById('ab-when-btn');
+        const cal = document.getElementById('ab-cal');
+        if (!btn || !cal) return;
+        const inH = document.getElementById('ab-cal-in');
+        const outH = document.getElementById('ab-cal-out');
+        const valLabel = document.getElementById('ab-when-value');
+        const footIn = document.getElementById('ab-foot-in');
+        const footOut = document.getElementById('ab-foot-out');
+
+        const now = new Date();
+        let viewY = now.getFullYear();
+        let viewM = now.getMonth();
+        let selS = inH.value || null;
+        let selE = outH.value || null;
+
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+        function key(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
+        function parseK(k) {
+          const p = k.split('-');
+          return new Date(+p[0], +p[1] - 1, +p[2]);
+        }
+        function fmtShort(k) {
+          if (!k) return '';
+          return parseK(k).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        }
+        function fmtLong(k) {
+          if (!k) return 'Exact date';
+          return parseK(k).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+        function isPast(y, m, d) {
+          const t = new Date();
+          t.setHours(0, 0, 0, 0);
+          return new Date(y, m, d) < t;
+        }
+
+        function renderMonth(boxEl, titleEl, y, m) {
+          titleEl.textContent = new Date(y, m, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          boxEl.innerHTML = '';
+          const blanks = new Date(y, m, 1).getDay();
+          for (let i = 0; i < blanks; i++) boxEl.appendChild(document.createElement('span'));
+          const days = new Date(y, m + 1, 0).getDate();
+          for (let d = 1; d <= days; d++) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'ab-day';
+            b.textContent = d;
+            const k = key(y, m, d);
+            if (isPast(y, m, d)) {
+              b.disabled = true;
+            } else {
+              if (k === selS || k === selE) b.classList.add('ab-day-sel');
+              else if (selS && selE && k > selS && k < selE) b.classList.add('ab-day-range');
+              (function (kk) {
+                b.addEventListener('click', function () { pick(kk); });
+              })(k);
+            }
+            boxEl.appendChild(b);
+          }
+        }
+
+        function render() {
+          const y1 = viewY, m1 = viewM;
+          const y2 = viewM === 11 ? viewY + 1 : viewY;
+          const m2 = viewM === 11 ? 0 : viewM + 1;
+          renderMonth(document.getElementById('ab-m1'), document.getElementById('ab-m1t'), y1, m1);
+          renderMonth(document.getElementById('ab-m2'), document.getElementById('ab-m2t'), y2, m2);
+          document.getElementById('ab-cal-prev').disabled = (y1 === now.getFullYear() && m1 === now.getMonth());
+        }
+
+        function sync() {
+          inH.value = selS || '';
+          outH.value = selE || '';
+          if (selS && selE) valLabel.textContent = fmtShort(selS) + '–' + fmtShort(selE);
+          else if (selS) valLabel.textContent = fmtShort(selS) + ' – checkout?';
+          else valLabel.textContent = 'Add dates';
+          footIn.textContent = fmtLong(selS);
+          footOut.textContent = fmtLong(selE);
+          render();
+        }
+
+        function pick(k) {
+          if (!selS || (selS && selE) || k <= selS) { selS = k; selE = null; }
+          else { selE = k; }
+          sync();
+        }
+
+        btn.addEventListener('click', function () {
+          cal.style.display = cal.style.display === 'none' ? 'block' : 'none';
+          const wp = document.getElementById('ab-panel');
+          if (wp) wp.style.display = 'none';
+          render();
+        });
+        document.getElementById('ab-cal-prev').addEventListener('click', function () {
+          if (viewM === 0) { viewM = 11; viewY--; } else { viewM--; }
+          render();
+        });
+        document.getElementById('ab-cal-next').addEventListener('click', function () {
+          const cap = new Date(now.getFullYear(), now.getMonth() + 11, 1);
+          const nxt = new Date(viewY, viewM + 1, 1);
+          if (nxt > cap) return;
+          viewM = nxt.getMonth();
+          viewY = nxt.getFullYear();
+          render();
+        });
+        document.getElementById('ab-cal-clear').addEventListener('click', function () {
+          selS = null;
+          selE = null;
+          sync();
+        });
+        cal.querySelectorAll('.ab-tab').forEach(function (t) {
+          t.addEventListener('click', function () {
+            cal.querySelectorAll('.ab-tab').forEach(function (x) { x.classList.remove('ab-tab-active'); });
+            t.classList.add('ab-tab-active');
+            const flex = t.getAttribute('data-abtab') === 'flex';
+            document.getElementById('ab-cal-dates').style.display = flex ? 'none' : 'block';
+            document.getElementById('ab-cal-flex').style.display = flex ? 'block' : 'none';
+          });
+        });
+        document.addEventListener('click', function (ev) {
+          if (cal.style.display === 'none') return;
+          if (cal.contains(ev.target) || btn.contains(ev.target)) return;
+          cal.style.display = 'none';
+        });
+        document.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Escape') cal.style.display = 'none';
+        });
+        sync();
+      })();
+    </script>
       </div>
       <!-- Right side items - pushed to extreme right -->
       <ul class="navbar-nav ms-auto">
@@ -65,6 +531,9 @@
         <% if(currUser) { %>
           <li class="nav-item">
             <a class="nav-link" href="/bookings"><b>My Trips</b></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/bookings/host"><b>Reservations</b></a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/logout"><b>Logout</b></a>

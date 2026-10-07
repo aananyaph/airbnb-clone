@@ -1,0 +1,56 @@
+<% layout('/layout/boilerplate') -%>
+<body class="p-4">
+
+<h2>Reservations</h2>
+<p class="card-text text-muted">Bookings on listings you own. Read only.</p>
+
+<% if(!bookings || bookings.length === 0) { %>
+  <div class="alert alert-info">
+    No reservations yet. Nobody has booked your listings.
+  </div>
+<% } else { %>
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Listing</th>
+          <th>Guest</th>
+          <th>Dates</th>
+          <th>Guests</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (let booking of bookings) { %>
+        <tr>
+          <td>
+            <% if (booking.listing && booking.listing.image) { %>
+            <img src="<%= booking.listing.image.url %>" alt="listing" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+            <% } %>
+            <%= booking.listing ? booking.listing.title : "Deleted listing" %>
+          </td>
+          <td>@<%= booking.user ? booking.user.username : "Unknown" %></td>
+          <td>
+            <%= booking.checkIn ? (new Date(booking.checkIn)).toLocaleDateString('en-IN') : 'N/A' %> -
+            <%= booking.checkOut ? (new Date(booking.checkOut)).toLocaleDateString('en-IN') : 'N/A' %>
+          </td>
+          <td><%= booking.guests %></td>
+          <td>₹<%= booking.totalPrice ? booking.totalPrice.toLocaleString('en-IN') : 'N/A' %></td>
+          <td>
+            <% if (booking.status === 'confirmed') { %>
+              <span class="badge bg-success">confirmed</span>
+            <% } else if (booking.status === 'pending') { %>
+              <span class="badge bg-warning text-dark">pending</span>
+            <% } else { %>
+              <span class="badge bg-secondary">cancelled</span>
+            <% } %>
+          </td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+</body>

@@ -52,7 +52,7 @@ const listingSchema = new Schema({
   country: String,
 
   // Capacity details shown as "4 guests · 2 bedrooms · 2 beds · 1 bathroom"
-  maxGuests: { type: Number, min: 1 },
+  maxGuests: { type: Number, min: 1, default: 4 },
   bedrooms: { type: Number, min: 0 },
   beds: { type: Number, min: 0 },
   bathrooms: { type: Number, min: 0 },

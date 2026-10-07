@@ -2,21 +2,105 @@ const Listing = require("../models/listing");
 const Booking = require("../models/booking");
 
 /* ======================
-   INDEX (with category filter + owner)
+   INDEX (filters + pagination, all server-side via GET params)
    ====================== */
 module.exports.index = async (req, res) => {
-  const { category } = req.query;
-  let listings;
+  const { category, q, minPrice, maxPrice, guests, checkIn, checkOut } = req.query;
+  const clauses = [];
 
   if (category) {
-    listings = await Listing.find({
-      category: { $in: [category] }
-    }).populate("owner");
-  } else {
-    listings = await Listing.find({}).populate("owner");
+    clauses.push({ category: { $in: [category] } });
   }
 
-  res.render("listings/index.ejs", { listings, category });
+  // Location or country text search
+  if (q && q.trim()) {
+    const rx = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    clauses.push({ $or: [{ location: rx }, { country: rx }] });
+  }
+
+  // Price range
+  const minP = parseFloat(minPrice);
+  const maxP = parseFloat(maxPrice);
+  if ((!isNaN(minP) && minPrice !== "" && minPrice != null) || (!isNaN(maxP) && maxPrice !== "" && maxPrice != null)) {
+    const priceCond = {};
+    if (!isNaN(minP) && minPrice !== "" && minPrice != null) priceCond.$gte = minP;
+    if (!isNaN(maxP) && maxPrice !== "" && maxPrice != null) priceCond.$lte = maxP;
+    clauses.push({ price: priceCond });
+  }
+
+  // Sleeps at least this many guests (old listings without the field count as default 4)
+  const g = parseInt(guests, 10);
+  if (!isNaN(g) && g > 0) {
+    clauses.push({ $or: [{ maxGuests: { $gte: g } }, { maxGuests: { $exists: false } }] });
+  }
+
+  // Date filter: hide listings with an overlapping confirmed or fresh pending booking
+  if (checkIn || checkOut) {
+    const inD = checkIn ? new Date(checkIn) : null;
+    const outD = checkOut ? new Date(checkOut) : null;
+    if (!inD || isNaN(inD) || !outD || isNaN(outD) || outD <= inD) {
+      req.flash("error", "Date filter needs a valid check-in before check-out — dates ignored");
+    } else {
+      const overlapping = await Booking.find({
+        $or: [
+          { status: "confirmed" },
+          { status: "pending", createdAt: { $gt: new Date(Date.now() - 15 * 60 * 1000) } }
+        ],
+        checkIn: { $lt: outD },
+        checkOut: { $gt: inD }
+      }).select("listing");
+      const blocked = [...new Set(overlapping.map((b) => String(b.listing)))];
+      if (blocked.length) clauses.push({ _id: { $nin: blocked } });
+    }
+  }
+
+  const filter = clauses.length ? { $and: clauses } : {};
+
+  // Pagination: 12 per page, deterministic newest-first order
+  const limit = 12;
+  const total = await Listing.countDocuments(filter);
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const page = Math.min(Math.max(1, parseInt(req.query.page, 10) || 1), totalPages);
+
+  const listings = await Listing.find(filter)
+    .populate("owner")
+    .populate({ path: "reviews", select: "rating" })
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  // Average rating + count per card (rated reviews only, so old
+  // rating-less reviews never crash or drag the average)
+  listings.forEach((l) => {
+    const rated = (l.reviews || []).filter((r) => r.rating != null);
+    l.reviewCount = rated.length;
+    l.avgRating = rated.length
+      ? (rated.reduce((s, r) => s + r.rating, 0) / rated.length).toFixed(1)
+      : null;
+  });
+
+  // Query string (without page) so pagination links keep every filter
+  const qp = new URLSearchParams();
+  for (const k of ["category", "q", "minPrice", "maxPrice", "guests", "checkIn", "checkOut"]) {
+    if (req.query[k] !== undefined && req.query[k] !== "") qp.set(k, req.query[k]);
+  }
+
+  res.render("listings/index.ejs", {
+    listings,
+    category,
+    filters: {
+      q: q || "",
+      minPrice: minPrice || "",
+      maxPrice: maxPrice || "",
+      guests: guests || "",
+      checkIn: checkIn || "",
+      checkOut: checkOut || ""
+    },
+    page,
+    totalPages,
+    total,
+    baseQuery: qp.toString()
+  });
 };
 
 /* ======================

@@ -282,6 +282,20 @@ module.exports.paymentFailed = async (req, res) => {
 };
 
 /* ======================
+   HOST RESERVATIONS (read only)
+   GET /bookings/host — all bookings on listings the user owns
+   ====================== */
+module.exports.hostIndex = async (req, res) => {
+  const myListings = await Listing.find({ owner: req.user._id }).select("_id");
+  const ids = myListings.map((l) => l._id);
+  const bookings = await Booking.find({ listing: { $in: ids } })
+    .populate({ path: "listing", select: "title image" })
+    .populate({ path: "user", select: "username" })
+    .sort({ createdAt: -1 });
+  res.render("bookings/host.ejs", { bookings });
+};
+
+/* ======================
    MY TRIPS
    GET /bookings (newest first)
    ====================== */

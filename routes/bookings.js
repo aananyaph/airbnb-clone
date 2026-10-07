@@ -7,6 +7,9 @@ const bookingController = require("../controllers/bookings.js");
 // GET /bookings - "My Trips" page (newest first)
 router.get("/", isLoggedIn, wrapAsync(bookingController.index));
 
+// GET /bookings/host - host reservations page (read only, kept above :bookingId routes)
+router.get("/host", isLoggedIn, wrapAsync(bookingController.hostIndex));
+
 // GET /bookings/:bookingId/checkout - "Confirm and pay" summary page
 router.get("/:bookingId/checkout", isLoggedIn, wrapAsync(bookingController.checkout));
 
